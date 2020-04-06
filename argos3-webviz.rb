@@ -9,7 +9,8 @@ class Argos3Webviz < Formula
   desc "A Web interface plugin for ARGoS 3(https://argos-sim.info)."
   homepage "https://github.com/NESTlab/argos3-webviz"
   head "https://github.com/NESTlab/argos3-webviz.git"
-  sha256 "5a900510eaf9b7fac04ed4c3fb37379d90da98a707f40ed34e46679d44d3beae"
+
+  sha256 "5dc4c7c4f02ae0b07b28da05f6132072da47f8cb2a8c13d909ad2b1dd0a954ef"
   
   url $json_data["tarball_url"]
   version $json_data["tag_name"]
