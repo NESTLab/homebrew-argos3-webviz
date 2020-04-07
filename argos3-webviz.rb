@@ -1,35 +1,30 @@
-require "net/http"
-require "json"
-require "formula"
+require 'net/http'
+require 'json'
 
-response = Net::HTTP.get(URI("https://api.github.com/repos/NESTlab/argos3-webviz/releases/latest"))
-$json_data = JSON.parse(response)
+response = Net::HTTP.get(URI('https://api.github.com/repos/NESTlab/argos3-webviz/releases/latest'))
+json_data = JSON.parse(response)
 
-class Argos3Webviz < Formula
-  desc "Web interface plugin for ARGoS 3(https://argos-sim.info)"
-  homepage "https://github.com/NESTlab/argos3-webviz"
-  url $json_data["tarball_url"]
-  version $json_data["tag_name"]
+indx1 = response.rindex('OSX.pkg') + 7
+indx2 = response[0, indx1].rindex('"') + 1
 
-  sha256 "5dc4c7c4f02ae0b07b28da05f6132072da47f8cb2a8c13d909ad2b1dd0a954ef"
+url = response[indx2, indx1 - indx2].strip # Get OSX url link
+pkg_name = url[(url.rindex('/') + 1)..-1]
 
-  head "https://github.com/NESTlab/argos3-webviz.git"
+cask 'argos3-webviz' do
+  version json_data['tag_name']
+  sha256 :no_check
 
-  depends_on "ilpincy/argos3/argos3" => [:build, :test]
-  depends_on "openssl@1.1" => :build
-  depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
-  depends_on "lua"
+  url url
+  appcast 'https://github.com/NESTlab/argos3-webviz/releases.atom'
+  name 'argos3-webviz'
+  homepage 'https://github.com/NESTlab/argos3-webviz'
 
-  def install
-    mkdir "build"
-    cd "build" 
-    system "cmake", "../src", "-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_INSTALL_PREFIX=#{prefix}"
-    system "cmake", "--build", ".", "--target", "all", "--parallel"
-    system "make", "install"
-  end
+  depends_on macos: '>= :sierra'
+  depends_on arch: :x86_64
+  depends_on formula: 'ilpincy/argos3/argos3'
+  depends_on formula: 'openssl@1.1'
 
-  test do
-    system "argos3", "-q", "webviz"
-  end
+  pkg pkg_name
+
+  uninstall pkgutil: 'com.argos3.plugins.webviz'
 end
